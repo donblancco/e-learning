@@ -105,6 +105,17 @@ docker exec elearning_backend python manage.py load_csv_data
 - **バックエンドAPI**: http://localhost:8000
 - **Django管理画面**: http://localhost:8000/admin
 
+## 📷 プレビュー
+
+### メイン画面
+![メイン画面](./img/main.png)
+
+### クイズ画面
+![クイズ画面](./img/quiz.png)
+
+### 管理者クイズ管理画面
+![管理者クイズ管理画面](./img/admin_quiz.png)
+
 ## 📁 プロジェクト構成
 
 ```
@@ -216,17 +227,7 @@ docker exec elearning_frontend npm test
 - **CI/CD**: 自動テスト・デプロイ
 - **Issue管理**: GitHub Issues活用
 
-## 📈 今後の拡張予定
 
-- [ ] **リアルタイム機能**: WebSocketによるライブクイズ
-- [ ] **AI機能**: 学習内容の自動推薦
-- [ ] **モバイルアプリ**: React Native対応
-- [ ] **多言語対応**: i18n国際化
-- [ ] **動画学習**: 動画コンテンツ対応
-
-## 📜 ライセンス
-
-このプロジェクトはMITライセンスの下で公開されています。
 
 ## 👨‍💻 作者
 
@@ -240,6 +241,3 @@ docker exec elearning_frontend npm test
 - UI/UXデザイン（Material-UI）
 - プロジェクト管理・ドキュメント作成
 
----
-
-⭐ このプロジェクトが参考になった場合は、スターをいただけると嬉しいです！
