@@ -1,0 +1,97 @@
+# docker-compose.yml
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: elearning_db
+    environment:
+      POSTGRES_DB: elearning_db
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-change_me}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - elearning_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d elearning_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis (for Celery)
+  redis:
+    image: redis:7-alpine
+    container_name: elearning_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - elearning_network
+
+  # Django Backend
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: elearning_backend
+    environment:
+      - DEBUG=1
+      - DJANGO_SETTINGS_MODULE=elearning.settings.development
+      - DB_HOST=db
+      - DB_NAME=elearning_db
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-change_me}
+      - REDIS_URL=redis://redis:6379/0
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - ./data:/app/data  # CSVファイル用
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - elearning_network
+    command: >
+      sh -c "
+        echo 'Waiting for PostgreSQL to be ready...' &&
+        sleep 5 &&
+        while ! nc -z db 5432; do
+          echo 'PostgreSQL is unavailable - sleeping'
+          sleep 1
+        done &&
+        echo 'PostgreSQL is ready!' &&
+        python manage.py migrate &&
+        python manage.py runserver 0.0.0.0:8000
+      "
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: elearning_frontend
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+      - REACT_APP_PRIMARY_COLOR=#40b87c
+      - REACT_APP_DARK_COLOR=#27313b
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - elearning_network
+
+volumes:
+  postgres_data:
+
+networks:
+  elearning_network:
+    driver: bridge

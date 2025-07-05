@@ -1,0 +1,8 @@
+{
+  "short_name": "E-learning",
+  "name": "E-learning System",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#40b87c",
+  "background_color": "#ffffff"
+}
